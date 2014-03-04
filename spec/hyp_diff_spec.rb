@@ -141,6 +141,10 @@ describe HypDiff do
       expect_diff("world", "hello world", "<ins>hello </ins>world")
       expect_diff("hello world", "world", "<del>hello </del>world")
     end
+
+    it "focusses on change in words not on change in whitespace" do
+      expect_diff("a a b", "b c c", "<del>a a </del>b<ins> c c</ins>")
+    end
   end
 
   it "diffs punctuation signs as single tokens when followed by whitespace" do
@@ -169,6 +173,10 @@ describe HypDiff do
 
   it "diffs punctuation signs as single tokens when at end of string" do
     expect_diff("hello world", "hello world.", "hello world<ins>.</ins>")
+  end
+
+  it "diffs punctuation signs as part of tokens when inside words" do
+    expect_diff("hello world", "hello.world", "<del>hello world</del><ins>hello.world</ins>")
   end
 
 end
