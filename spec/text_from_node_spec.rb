@@ -1,4 +1,6 @@
-require "text_from_node"
+require "hyp_diff/text_from_node"
+
+module HypDiff
 
 describe TextFromNode do
 
@@ -24,3 +26,4 @@ describe TextFromNode do
 
 end
 
+end

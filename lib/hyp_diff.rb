@@ -1,7 +1,7 @@
 require "nokogiri"
 require "diff-lcs"
 
-require "text_from_node"
+require "hyp_diff/text_from_node"
 
 module HypDiff; class << self
 
