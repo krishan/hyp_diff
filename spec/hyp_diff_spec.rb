@@ -66,6 +66,18 @@ describe HypDiff do
     )
   end
 
+  describe "with callbacks for custom markup" do
+    it "uses them to generate the insertions and deletions" do
+      HypDiff.compare(
+        "byebye world",
+        "hello world",
+        render_insertion: proc { |html| "<new>#{html}</new>" },
+        render_deletion: proc { |html| "<old>#{html}</old>" }
+      ).should ==
+        "<old>byebye</old><new>hello</new> world"
+    end
+  end
+
   describe "handling whitespace" do
     it "treats consecutive whitespace as a single whitespace" do
       expect_diff("hello  world", "hello world", "hello world")

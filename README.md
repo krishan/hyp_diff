@@ -4,8 +4,16 @@ HypDiff compares HTML snippets. It generates a diff between two input snippets. 
 
 ## Usage
 
+    # compare using the defaults: <ins> and <del> tags are inserted into the markup
     HypDiff.compare("<p>byebye world</p>", "<p>hello world</p>")
-    # '<p><del>byebye</del><ins>hello</ins> world</p> '
+    # => '<p><del>byebye</del><ins>hello</ins> world</p> '
+
+    # use custom markup by providing callbacks for rendering insertions and deletions
+    HypDiff.compare("<p>byebye world</p>", "<p>hello world</p>",
+      render_insertion: proc { |html| "<span data-diff='ins'>#{html}</span>" },
+      render_deletion: proc { |html| "<span data-diff='del'>#{html}</span>" }
+    )
+    # '<p><span data-diff='del'>byebye</span><span data-diff='ins'>hello</span> world</p> '
 
 For more examples, take a look at the [specs](spec/hyp_diff_spec.rb).
 

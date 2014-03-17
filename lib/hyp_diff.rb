@@ -5,14 +5,21 @@ require "text_from_node"
 
 module HypDiff; class << self
 
-  def compare(before, after)
+  def compare(before, after, options = {})
     parsed_after = parse(after)
     parsed_before = parse(before)
 
     text_changes = Diff::LCS.sdiff(extract_text(parsed_before), extract_text(parsed_after))
 
-    NodeMap.for(text_changes).each do |node, changes|
-      node.replace(ChangeRenderer.render(changes))
+    change_node_tuples = text_changes.map do |change|
+      [change, change.new_element && change.new_element.node]
+    end
+
+    render_deletion = options[:render_deletion] || proc { |html| "<del>#{html}</del>" }
+    render_insertion = options[:render_insertion] || proc { |html| "<ins>#{html}</ins>" }
+
+    NodeMap.for(change_node_tuples).each do |node, changes|
+      node.replace(ChangeRenderer.render(changes, render_deletion, render_insertion))
     end
 
     parsed_after.to_html
@@ -21,8 +28,8 @@ module HypDiff; class << self
   private
 
   class NodeMap
-    def self.for(changes)
-      new.build(changes).map
+    def self.for(change_node_tuples, &block)
+      new.build(change_node_tuples).map
     end
 
     attr_reader :map
@@ -32,11 +39,9 @@ module HypDiff; class << self
       @stashed = []
     end
 
-    def build(changes)
-      changes.each do |change|
-        if change.new_element
-          node = change.new_element.node
-
+    def build(change_node_tuples)
+      change_node_tuples.each do |change, node|
+        if node
           if @stashed.length > 0
             @stashed.each do |stashed_change|
               append_to_node(node, stashed_change)
@@ -66,12 +71,14 @@ module HypDiff; class << self
   end
 
   class ChangeRenderer
-    def self.render(changes)
-      renderer = new.render(changes).rendered_text
+    def self.render(changes, render_deletion, render_insertion)
+      renderer = new(render_deletion, render_insertion).render(changes).rendered_text
     end
 
-    def initialize
+    def initialize(render_deletion, render_insertion)
       @new_text = []
+      @render_deletion = render_deletion
+      @render_insertion = render_insertion
     end
 
     def render(changes)
@@ -121,11 +128,11 @@ module HypDiff; class << self
     end
 
     def insertion_tag(text)
-      "<ins>#{text}</ins>"
+      @render_insertion.call(text)
     end
 
     def deletion_tag(text)
-      "<del>#{text}</del>"
+      @render_deletion.call(text)
     end
 
   end
