@@ -78,6 +78,26 @@ describe HypDiff do
     end
   end
 
+  describe "choosing which markup to use" do
+    it "allows to choose 'after'" do
+      HypDiff.compare(
+        "<b>byebye world</b>",
+        "<i>hello world</i>",
+        markup_from: "after"
+      ).should ==
+        "<i><del>byebye</del><ins>hello</ins> world</i>"
+    end
+
+    it "allows to choose 'before'" do
+      HypDiff.compare(
+        "<b>byebye world</b>",
+        "<i>hello world</i>",
+        markup_from: "before"
+      ).should ==
+        "<b><del>byebye</del><ins>hello</ins> world</b>"
+    end
+  end
+
   describe "handling whitespace" do
     it "treats consecutive whitespace as a single whitespace" do
       expect_diff("hello  world", "hello world", "hello world")

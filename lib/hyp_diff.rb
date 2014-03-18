@@ -11,6 +11,7 @@ module HypDiff; class << self
   # @param after [String] the second html snippet
   # @option options [Proc] :render_insertion provide a callback to render insertions. The callback will receive the inserted text as a html snippet. It should return a new html snippet that will be used in the output. If no callback is given, `<ins>`-Tags will be used to highlight insertions.
   # @option options [Proc] :render_deletion provide a callback to render deletions. The callback will receive the deleted text as a html snippet. It should return a new html snippet that will be used in the output. If no callback is given, `<del>`-Tags will be used to highlight deletions.
+  # @option options [String] :markup_from specify if the markup from `before` or `after` should be used as the basis for the output. Possible values: "before" and "after". Default: "after"
   # @return [String] a new html snippet that highlights changes between `before` and `after`
   # @api public
   def compare(before, after, options = {})
@@ -19,8 +20,11 @@ module HypDiff; class << self
 
     text_changes = Diff::LCS.sdiff(extract_text(parsed_before), extract_text(parsed_after))
 
+    markup_from_before = options[:markup_from] == "before"
+
     change_node_tuples = text_changes.map do |change|
-      [change, change.new_element && change.new_element.node]
+      text_from_node = markup_from_before ? change.old_element : change.new_element
+      [change, text_from_node && text_from_node.node]
     end
 
     render_deletion = options[:render_deletion] || proc { |html| "<del>#{html}</del>" }
@@ -30,7 +34,8 @@ module HypDiff; class << self
       node.replace(ChangeRenderer.render(changes, render_deletion, render_insertion))
     end
 
-    parsed_after.to_html
+    modified_fragment = markup_from_before ? parsed_before : parsed_after
+    modified_fragment.to_html
   end
 
   private

@@ -15,6 +15,12 @@ HypDiff compares HTML snippets. It generates a diff between two input snippets. 
     )
     # '<p><span data-diff='del'>byebye</span><span data-diff='ins'>hello</span> world</p> '
 
+    # choose which markup should be the basis for the results:
+    HypDiff.compare("<div>byebye world</div>", "<p>hello world</p>", markup_from: "before")
+    # => '<div><del>byebye</del><ins>hello</ins> world</div> '
+    HypDiff.compare("<div>byebye world</div>", "<p>hello world</p>", markup_from: "after")
+    # => '<p><del>byebye</del><ins>hello</ins> world</p> '
+
 For more examples, take a look at the [specs](https://github.com/krishan/hyp_diff/blob/master/spec/hyp_diff_spec.rb).
 
 ## Why another diff tool?
