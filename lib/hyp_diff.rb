@@ -3,8 +3,16 @@ require "diff-lcs"
 
 require "hyp_diff/text_from_node"
 
+# @api public
 module HypDiff; class << self
 
+  # Compare two html snippets.
+  # @param before [String] the first html snippet
+  # @param after [String] the second html snippet
+  # @option options [Proc] :render_insertion provide a callback to render insertions. The callback will receive the inserted text as a html snippet. It should return a new html snippet that will be used in the output. If no callback is given, `<ins>`-Tags will be used to highlight insertions.
+  # @option options [Proc] :render_deletion provide a callback to render deletions. The callback will receive the deleted text as a html snippet. It should return a new html snippet that will be used in the output. If no callback is given, `<del>`-Tags will be used to highlight deletions.
+  # @return [String] a new html snippet that highlights changes between `before` and `after`
+  # @api public
   def compare(before, after, options = {})
     parsed_after = parse(after)
     parsed_before = parse(before)
@@ -27,6 +35,7 @@ module HypDiff; class << self
 
   private
 
+  # @api private
   class NodeMap
     def self.for(change_node_tuples, &block)
       new.build(change_node_tuples).map
@@ -70,6 +79,7 @@ module HypDiff; class << self
     end
   end
 
+  # @api private
   class ChangeRenderer
     def self.render(changes, render_deletion, render_insertion)
       renderer = new(render_deletion, render_insertion).render(changes).rendered_text

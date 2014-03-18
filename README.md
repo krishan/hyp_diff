@@ -15,7 +15,7 @@ HypDiff compares HTML snippets. It generates a diff between two input snippets. 
     )
     # '<p><span data-diff='del'>byebye</span><span data-diff='ins'>hello</span> world</p> '
 
-For more examples, take a look at the [specs](spec/hyp_diff_spec.rb).
+For more examples, take a look at the [specs](https://github.com/krishan/hyp_diff/blob/master/spec/hyp_diff_spec.rb).
 
 ## Why another diff tool?
 
