@@ -107,7 +107,7 @@ module HypDiff; class << self
           insertions << change.new_element.text
         when "=" then
           apply_insertions_and_deletions
-          new_text << change.new_element.text
+          new_text << escape_html(change.new_element.text)
         when "+" then
           insertions << change.new_element.text
         when "-" then
@@ -132,10 +132,10 @@ module HypDiff; class << self
 
     def apply_insertions_and_deletions
       if deletions.length > 0
-        @new_text << deletion_tag(deletions.join)
+        new_text << deletion_tag(deletions.join)
       end
       if insertions.length > 0
-        @new_text << insertion_tag(insertions.join)
+        new_text << insertion_tag(insertions.join)
       end
 
       @insertions = []
@@ -143,11 +143,17 @@ module HypDiff; class << self
     end
 
     def insertion_tag(text)
-      @render_insertion.call(text)
+      @render_insertion.call(escape_html(text))
     end
 
     def deletion_tag(text)
-      @render_deletion.call(text)
+      @render_deletion.call(escape_html(text))
+    end
+
+    def escape_html(text)
+      fragment = Nokogiri::HTML::DocumentFragment.parse("")
+      fragment.content = text
+      fragment.to_html
     end
 
   end
@@ -162,7 +168,7 @@ module HypDiff; class << self
 
   def text_fragments(node)
     if node.is_a?(Nokogiri::XML::Text)
-      node.text.split(/(?=[.!, ])|\b/).map { |token| TextFromNode.new(token, node) }
+      node.text.split(/(?=[.!,<> ])|\b/).map { |token| TextFromNode.new(token, node) }
     else
       node.children.map { |c| text_fragments(c) }.flatten
     end

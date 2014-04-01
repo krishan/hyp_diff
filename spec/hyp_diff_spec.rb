@@ -98,6 +98,24 @@ describe HypDiff do
     end
   end
 
+  describe "handling html entities" do
+    it "handles them transparently when whole words are entities" do
+      expect_diff(
+        "foo &lt; bar",
+        "foo &gt; bar",
+        "foo <del>&lt;</del><ins>&gt;</ins> bar"
+      )
+    end
+
+    it "handles them transparently when words contain entities" do
+      expect_diff(
+        "f&#252; b&#228;r",
+        "f&#246; b&#228;r",
+        "<del>f&#252;</del><ins>f&#246;</ins> b&#228;r"
+      )
+    end
+  end
+
   describe "handling whitespace" do
     it "treats consecutive whitespace as a single whitespace" do
       expect_diff("hello  world", "hello world", "hello world")
