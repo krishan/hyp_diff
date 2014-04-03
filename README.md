@@ -2,26 +2,12 @@
 
 HypDiff compares HTML snippets. It generates a diff between two input snippets. The diff is a new HTML snippet that highlights textual changes. The tag structure and formatting of the input snippets is preserved. The generated diff snippet is valid, well-formed HTML and suitable for presentation inside a WYSIWYG environment.
 
-## Usage
+## Basic Usage
 
-    # compare using the defaults: <ins> and <del> tags are inserted into the markup
+Compare two HTML snippets:
+
     HypDiff.compare("<p>byebye world</p>", "<p>hello world</p>")
-    # => '<p><del>byebye</del><ins>hello</ins> world</p> '
-
-    # use custom markup by providing callbacks for rendering insertions and deletions
-    HypDiff.compare("<p>byebye world</p>", "<p>hello world</p>",
-      render_insertion: proc { |html| "<span data-diff='ins'>#{html}</span>" },
-      render_deletion: proc { |html| "<span data-diff='del'>#{html}</span>" }
-    )
-    # '<p><span data-diff='del'>byebye</span><span data-diff='ins'>hello</span> world</p> '
-
-    # choose which markup should be the basis for the results:
-    HypDiff.compare("<div>byebye world</div>", "<p>hello world</p>", markup_from: "before")
-    # => '<div><del>byebye</del><ins>hello</ins> world</div> '
-    HypDiff.compare("<div>byebye world</div>", "<p>hello world</p>", markup_from: "after")
-    # => '<p><del>byebye</del><ins>hello</ins> world</p> '
-
-For more examples, take a look at the [specs](https://github.com/krishan/hyp_diff/blob/master/spec/hyp_diff_spec.rb).
+    => '<p><del>byebye</del><ins>hello</ins> world</p>'
 
 ## Why another diff tool?
 
@@ -38,6 +24,23 @@ HypDiff does not rely on regular expressions, but actually parses the input snip
 ## Limitations
 
 HypDiff does not perform a comparison of the html source code or the DOM tree, but compares changes to visible text. It does not care about changes that do not involve visible text.
+
+## Advanced Usage
+
+    # use custom markup by providing callbacks for rendering insertions and deletions
+    HypDiff.compare("<p>byebye world</p>", "<p>hello world</p>",
+      render_insertion: proc { |html| "<span data-diff='ins'>#{html}</span>" },
+      render_deletion: proc { |html| "<span data-diff='del'>#{html}</span>" }
+    )
+    # '<p><span data-diff='del'>byebye</span><span data-diff='ins'>hello</span> world</p> '
+
+    # choose which markup should be the basis for the results:
+    HypDiff.compare("<div>byebye world</div>", "<p>hello world</p>", markup_from: "before")
+    # => '<div><del>byebye</del><ins>hello</ins> world</div> '
+    HypDiff.compare("<div>byebye world</div>", "<p>hello world</p>", markup_from: "after")
+    # => '<p><del>byebye</del><ins>hello</ins> world</p> '
+
+For more examples, take a look at the [specs](https://github.com/krishan/hyp_diff/blob/master/spec/hyp_diff_spec.rb).
 
 ## Installation
 
