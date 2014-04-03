@@ -1,3 +1,4 @@
+# encoding: utf-8
 require "hyp_diff"
 
 describe HypDiff do
@@ -111,7 +112,7 @@ describe HypDiff do
       expect_diff(
         "f&#252; b&#228;r",
         "f&#246; b&#228;r",
-        "<del>f&#252;</del><ins>f&#246;</ins> b&#228;r"
+        "<del>fü</del><ins>fö</ins> bär"
       )
     end
   end
