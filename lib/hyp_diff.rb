@@ -2,6 +2,8 @@ require "nokogiri"
 require "diff-lcs"
 
 require "hyp_diff/text_from_node"
+require "hyp_diff/tokenizer"
+require "hyp_diff/chunk_builder"
 
 # @api public
 module HypDiff; class << self
@@ -31,7 +33,9 @@ module HypDiff; class << self
     render_insertion = options[:render_insertion] || proc { |html| "<ins>#{html}</ins>" }
 
     NodeMap.for(change_node_tuples).each do |node, changes|
-      node.replace(ChangeRenderer.render(changes, render_deletion, render_insertion))
+      # TODO callbacks berücksichtigen
+      # node.replace(ChangeRenderer.render(changes, render_deletion, render_insertion))
+      node.replace(ChunkRenderer.render(ChunkBuilder.build_chunks_for(changes)))
     end
 
     modified_fragment = markup_from_before ? parsed_before : parsed_after
@@ -270,7 +274,7 @@ module HypDiff; class << self
 
   def text_fragments(node)
     if node.is_a?(Nokogiri::XML::Text)
-      node.text.split(/(?=[.!,<> ])|\b/).map { |token| TextFromNode.new(token, node) }
+      Tokenizer.tokenize(node.text).map { |token| TextFromNode.new(token, node) }
     else
       node.children.map { |c| text_fragments(c) }.flatten
     end

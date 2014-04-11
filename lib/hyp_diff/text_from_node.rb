@@ -1,8 +1,8 @@
 module HypDiff
 
 class TextFromNode
-  def initialize(raw_text, node)
-    @text = raw_text.strip == "" ? " " : raw_text
+  def initialize(text, node)
+    @text = text
     @node = node
   end
 
@@ -19,7 +19,7 @@ class TextFromNode
   end
 
   def whitespace?
-    @text == " "
+    @text == ""
   end
 
   def text
