@@ -140,24 +140,6 @@ describe HypDiff do
       expect_diff("hello world", "hello", "hello<del> world</del>")
       expect_diff("world", "hello world", "<ins>hello </ins>world")
       expect_diff("hello world", "world", "<del>hello </del>world")
-      expect_diff(" world", "hello world", "<ins>hello</ins> world")
-      expect_diff("hello world", " world", "<del>hello</del> world")
-      expect_diff("hello ", "hello world", "hello <ins>world</ins>")
-      expect_diff("hello world", "hello ", "hello <del>world</del>")
-    end
-
-    it "considers trailing and leading whitespace changes" do
-      expect_diff("hello ", "hello", "hello<del> </del>")
-      expect_diff("hello", "hello ", "hello<ins> </ins>")
-      expect_diff(" hello", "hello", "<del> </del>hello")
-      expect_diff("hello", " hello", "<ins> </ins>hello")
-    end
-
-    it "considers changes of text and whitespace" do
-      expect_diff("hello world ", "hello friend", "hello <del>world </del><ins>friend</ins>")
-      expect_diff(" bye world", "hello world", "<del> bye</del><ins>hello</ins> world")
-      expect_diff("hello friend", "hello world ", "hello <del>friend</del><ins>world </ins>")
-      expect_diff("hello world", " bye world", "<del>hello</del><ins> bye</ins> world")
     end
   end
 
