@@ -85,6 +85,108 @@ module HypDiff; class << self
   end
 
   # @api private
+  class ChunkRenderer
+    def self.render(chunks)
+      result = ""
+
+      needs_whitespace = false
+      chunks.each_with_index do |chunk, index|
+        case chunk
+        when ChunkBuilder::DiffChunk then
+          insertions = chunk.insertions
+          deletions = chunk.deletions
+
+          # TODO exceptions for punctuation
+          ins_text = join_tokens(insertions) if insertions.length > 0
+          del_text = join_tokens(deletions) if deletions.length > 0
+
+          prev_chunk = chunks[index - 1] unless index == 0
+          prev_text = prev_chunk && prev_chunk.tokens.last
+
+          next_chunk = chunks[index + 1]
+          next_text = next_chunk && next_chunk.tokens.first
+
+          result += render_diff(prev_text, del_text, ins_text, next_text)
+        when ChunkBuilder::EqualChunk then
+          result += join_tokens(chunk.tokens)
+        else
+          raise "unknown class #{chunk.class}"
+        end
+      end
+
+      result
+    end
+
+    def self.render_diff(prev_text, del_text, ins_text, next_text)
+      del_next_join_char = join_character_for(del_text, next_text)
+      del_prev_join_char = join_character_for(prev_text, del_text || next_text)
+
+      ins_next_join_char = join_character_for(ins_text, next_text)
+      ins_prev_join_char = join_character_for(prev_text, ins_text || next_text)
+
+      if ins_prev_join_char == del_prev_join_char
+        common_prefix = ins_prev_join_char
+        ins_prev_join_char = ""
+        del_prev_join_char = ""
+      else
+        common_prefix = ""
+      end
+
+      if ins_next_join_char == del_next_join_char
+        common_suffix = ins_next_join_char
+        ins_next_join_char = ""
+        del_next_join_char = ""
+      else
+        common_suffix = ""
+      end
+
+      rendered_del = "#{del_prev_join_char}#{del_text}#{del_next_join_char}"
+      rendered_ins = "#{ins_prev_join_char}#{ins_text}#{ins_next_join_char}"
+
+      common_prefix +
+        (rendered_del != "" ? "<del>#{rendered_del}</del>" : "") +
+        (rendered_ins != "" ? "<ins>#{rendered_ins}</ins>" : "") +
+        common_suffix
+    end
+
+    def self.join_tokens(list)
+      result = ""
+
+      prev_item = nil
+      list.each do |item, index|
+        if prev_item
+          result += join_character_for(prev_item, item)
+        end
+        result += item
+        prev_item = item
+      end
+
+      result
+    end
+
+    def self.join_character_for(prev_text, next_text)
+      if prev_text && next_text
+        if Tokenizer.punctuation?(next_text)
+          ""
+        else
+          " "
+        end
+      else
+        ""
+      end
+    end
+
+    def self.needs_leading_space?(list)
+      list.length > 0
+    end
+
+    def self.needs_trailing_space?(list)
+      list.length > 0
+    end
+  end
+
+
+  # TODO remove this class
   class ChangeRenderer
     def self.render(changes, render_deletion, render_insertion)
       renderer = new(render_deletion, render_insertion).render(changes).rendered_text
