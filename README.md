@@ -1,5 +1,7 @@
 # HypDiff
 
+[![Build Status](https://travis-ci.org/krishan/hyp_diff.svg?branch=master)](https://travis-ci.org/krishan/hyp_diff)
+
 HypDiff compares HTML snippets. It generates a diff between two input snippets. The diff is a new HTML snippet that highlights textual changes. The tag structure and formatting of the input snippets is preserved. The generated diff snippet is valid, well-formed HTML and suitable for presentation inside a WYSIWYG environment.
 
 ## Basic Usage
