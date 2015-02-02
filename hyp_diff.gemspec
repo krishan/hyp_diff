@@ -20,7 +20,7 @@ HypDiff compares HTML snippets. It generates a diff between two input snippets. 
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "nokogiri", "~> 1.5.6"
+  spec.add_dependency "nokogiri", "~> 1.6.5"
   spec.add_dependency "diff-lcs", "~> 1.2.5"
 
   spec.add_development_dependency "bundler", "~> 1.5"
