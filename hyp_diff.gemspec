@@ -22,8 +22,4 @@ HypDiff compares HTML snippets. It generates a diff between two input snippets. 
 
   spec.add_dependency "nokogiri", "~> 1.6", ">= 1.6.5"
   spec.add_dependency "diff-lcs", "~> 1.2", ">= 1.2.5"
-
-  spec.add_development_dependency "bundler", "~> 1.5"
-  spec.add_development_dependency "rspec", "~> 2.14.1"
-  spec.add_development_dependency "rake", "~> 10.1"
 end
