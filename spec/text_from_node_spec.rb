@@ -12,16 +12,16 @@ describe TextFromNode do
   let(:other_text_same_node) { TextFromNode.new("eggs", node) }
 
   it "equals other instance when text is equal" do
-    subject.should == same_text_other_node
-    subject.should be_eql(same_text_other_node)
+    expect(subject).to eq(same_text_other_node)
+    expect(subject).to be_eql(same_text_other_node)
 
-    subject.should_not == other_text_same_node
-    subject.should_not be_eql(other_text_same_node)
+    expect(subject).not_to eq(other_text_same_node)
+    expect(subject).not_to be_eql(other_text_same_node)
   end
 
   it "provides a sane hash implementation" do
-    subject.hash.should == same_text_other_node.hash
-    subject.hash.should_not == other_text_same_node.hash
+    expect(subject.hash).to eq(same_text_other_node.hash)
+    expect(subject.hash).not_to eq(other_text_same_node.hash)
   end
 
 end

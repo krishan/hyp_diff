@@ -4,7 +4,7 @@ require "hyp_diff"
 describe HypDiff do
 
   def expect_diff(old, new, expected)
-    HypDiff.compare(old, new).should == expected
+    expect(HypDiff.compare(old, new)).to eq(expected)
   end
 
   it "diffs two texts, applying tags to indicate changes" do
@@ -69,33 +69,36 @@ describe HypDiff do
 
   describe "with callbacks for custom markup" do
     it "uses them to generate the insertions and deletions" do
-      HypDiff.compare(
+      expect(HypDiff.compare(
         "byebye world",
         "hello world",
         render_insertion: proc { |html| "<new>#{html}</new>" },
         render_deletion: proc { |html| "<old>#{html}</old>" }
-      ).should ==
+      )).to eq(
         "<old>byebye</old><new>hello</new> world"
+      )
     end
   end
 
   describe "choosing which markup to use" do
     it "allows to choose 'after'" do
-      HypDiff.compare(
+      expect(HypDiff.compare(
         "<b>byebye world</b>",
         "<i>hello world</i>",
         markup_from: "after"
-      ).should ==
+      )).to eq(
         "<i><del>byebye</del><ins>hello</ins> world</i>"
+      )
     end
 
     it "allows to choose 'before'" do
-      HypDiff.compare(
+      expect(HypDiff.compare(
         "<b>byebye world</b>",
         "<i>hello world</i>",
         markup_from: "before"
-      ).should ==
+      )).to eq(
         "<b><del>byebye</del><ins>hello</ins> world</b>"
+      )
     end
   end
 
