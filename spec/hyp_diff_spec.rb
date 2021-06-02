@@ -48,7 +48,7 @@ describe HypDiff do
   end
 
   it "merges consecutive deletions into a single tag" do
-    expect_diff("hello beautiful world", "hello world", "hello <del>beautiful </del>world")
+    expect_diff("hello beautiful world", "hello world", "hello<del> beautiful</del> world")
   end
 
   it "merge consecutive additions and edits into single tags" do
