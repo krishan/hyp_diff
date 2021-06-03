@@ -48,7 +48,7 @@ describe HypDiff do
   end
 
   it "merges consecutive deletions into a single tag" do
-    expect_diff("hello beautiful world", "hello world", "hello <del>beautiful </del>world")
+    expect_diff("hello beautiful world", "hello world", "hello<del> beautiful</del> world")
   end
 
   it "merge consecutive additions and edits into single tags" do
@@ -131,14 +131,19 @@ describe HypDiff do
         "hello world",
         "hello world"
       )
-      expect_diff(
-        "<span>hello </span>world",
-        "hello<span> world</span>",
-        "hello<span> world</span>"
-      )
     end
 
-    it "considers trailing and leading whitespace for insertions and deletions" do
+    it "treats consecutive whitespace as a single whitespace across tags (best effort for special cases)" do
+      expect(
+        HypDiff.compare(
+          "<span>hello </span>world",
+          "hello<span> world</span>",
+        )
+      ).to eq("hello<span> world</span>")
+        .or eq("hello<del> </del><span><ins> </ins>world</span>")
+    end
+
+    it "considers trailing and leading whitespace for insertions and deletions", :aggregate_failures do
       expect_diff("hello", "hello world", "hello<ins> world</ins>")
       expect_diff("hello world", "hello", "hello<del> world</del>")
       expect_diff("world", "hello world", "<ins>hello </ins>world")
@@ -149,14 +154,14 @@ describe HypDiff do
       expect_diff("hello world", "hello ", "hello <del>world</del>")
     end
 
-    it "considers trailing and leading whitespace changes" do
+    it "considers trailing and leading whitespace changes", :aggregate_failures do
       expect_diff("hello ", "hello", "hello<del> </del>")
       expect_diff("hello", "hello ", "hello<ins> </ins>")
       expect_diff(" hello", "hello", "<del> </del>hello")
       expect_diff("hello", " hello", "<ins> </ins>hello")
     end
 
-    it "considers changes of text and whitespace" do
+    it "considers changes of text and whitespace", :aggregate_failures do
       expect_diff("hello world ", "hello friend", "hello <del>world </del><ins>friend</ins>")
       expect_diff(" bye world", "hello world", "<del> bye</del><ins>hello</ins> world")
       expect_diff("hello friend", "hello world ", "hello <del>friend</del><ins>world </ins>")
@@ -168,7 +173,7 @@ describe HypDiff do
     expect_diff("hello world", "hello, world", "hello<ins>,</ins> world")
   end
 
-  it "diffs changes of punctuation to words" do
+  it "diffs changes of punctuation to words", :aggregate_failures do
     expect_diff(
       "hello, world",
       "hello beautiful world",
@@ -181,7 +186,7 @@ describe HypDiff do
     )
   end
 
-  it "diffs changes of punctuation to leading and trailing spaces" do
+  it "diffs changes of punctuation to leading and trailing spaces", :aggregate_failures do
     expect_diff("hello.", "hello ", "hello<del>.</del><ins> </ins>")
     expect_diff("hello ", "hello.", "hello<del> </del><ins>.</ins>")
     expect_diff(" hello", ".hello", "<del> </del><ins>.</ins>hello")
@@ -192,4 +197,10 @@ describe HypDiff do
     expect_diff("hello world", "hello world.", "hello world<ins>.</ins>")
   end
 
+  it "converts newlines to spaces" do
+    content =
+      "<h3>Office philosophy</h3>\n<h4> No set working places</h4>\n<p> bla bla </p>"
+    expect_diff(content, content,
+      "<h3>Office philosophy</h3> <h4>No set working places</h4> <p>bla bla </p>")
+  end
 end

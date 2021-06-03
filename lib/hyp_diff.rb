@@ -42,14 +42,14 @@ module HypDiff; class << self
 
   # @api private
   class NodeMap
-    def self.for(change_node_tuples, &block)
+    def self.for(change_node_tuples)
       new.build(change_node_tuples).map
     end
 
     attr_reader :map
 
     def initialize
-      @map = {}
+      @map = Hash.new {|h, k| h[k] = [] }
       @stashed = []
     end
 
@@ -79,8 +79,7 @@ module HypDiff; class << self
     end
 
     def append_to_node(node, change)
-      list = (@map[node] ||= [])
-      list << change
+      @map[node] << change
     end
   end
 
@@ -103,15 +102,63 @@ module HypDiff; class << self
       changes.each do |change|
         case change.action
         when "!" then
-          deletions << change.old_element.text
-          insertions << change.new_element.text
+          old_fulltext = change.old_element.fulltext
+          new_fulltext = change.new_element.fulltext
+          if old_fulltext.include?(new_fulltext)
+            if old_fulltext.start_with?(new_fulltext)
+              apply_insertions_and_deletions
+              new_text << new_fulltext
+              deletions << old_fulltext[new_fulltext.length..-1]
+              next
+            end
+            if old_fulltext.end_with?(new_fulltext)
+              deletions << old_fulltext[0, old_fulltext.length - new_fulltext.length]
+              apply_insertions_and_deletions
+              new_text << new_fulltext
+              next
+            end
+          end
+          if new_fulltext.include?(old_fulltext)
+            if new_fulltext.start_with?(old_fulltext)
+              apply_insertions_and_deletions
+              new_text << old_fulltext
+              insertions << new_fulltext[old_fulltext.length..-1]
+              next
+            end
+            if new_fulltext.end_with?(old_fulltext)
+              insertions << new_fulltext[0, new_fulltext.length - old_fulltext.length]
+              apply_insertions_and_deletions
+              new_text << old_fulltext
+              next
+            end
+          end
+          if insertions.empty? && deletions.empty? && change.old_element.before_whitespace && change.new_element.before_whitespace
+            new_text << " "
+            deletions << change.old_element.text
+            insertions << change.new_element.text
+            next
+          end
+          deletions << change.old_element.fulltext
+          insertions << change.new_element.fulltext
         when "=" then
+          if change.old_element.before_whitespace && !change.new_element.before_whitespace
+            deletions << " "
+            apply_insertions_and_deletions
+            new_text << change.new_element.text
+            next
+          end
+          if change.new_element.before_whitespace && !change.old_element.before_whitespace
+            insertions << " "
+            apply_insertions_and_deletions
+            new_text << change.new_element.text
+            next
+          end
           apply_insertions_and_deletions
-          new_text << escape_html(change.new_element.text)
+          new_text << escape_html(change.new_element.fulltext)
         when "+" then
-          insertions << change.new_element.text
+          insertions << change.new_element.fulltext
         when "-" then
-          deletions << change.old_element.text
+          deletions << change.old_element.fulltext
         else
           raise "unexpected change.action #{change.action}"
         end
@@ -131,6 +178,13 @@ module HypDiff; class << self
     attr_reader :insertions, :deletions, :new_text
 
     def apply_insertions_and_deletions
+      while !deletions.empty? && !insertions.empty?
+        break unless deletions.first == insertions.first
+
+        deletions.shift
+        new_text << insertions.shift
+      end
+
       if deletions.length > 0
         new_text << deletion_tag(deletions.join)
       end
@@ -163,7 +217,7 @@ module HypDiff; class << self
   end
 
   def extract_text(node)
-    filter_whitespace(text_fragments(node))
+    merge_whitespace(filter_whitespace(text_fragments(node)))
   end
 
   def text_fragments(node)
@@ -183,6 +237,35 @@ module HypDiff; class << self
 
       last_node_whitespace = node_whitespace
     end
+
+    result
+  end
+
+  def merge_whitespace(node_list)
+    result = []
+
+    last_whitespace_node = nil
+    node_list.each do |node|
+      if node.whitespace?
+        last_whitespace_node = node
+        next
+      end
+
+      unless last_whitespace_node
+        result << node
+        next
+      end
+
+      if last_whitespace_node.node.equal?(node.node)
+        node.before_whitespace = last_whitespace_node
+      else
+        result << last_whitespace_node
+      end
+      last_whitespace_node = nil
+      result << node
+    end
+
+    result << last_whitespace_node if last_whitespace_node
 
     result
   end
