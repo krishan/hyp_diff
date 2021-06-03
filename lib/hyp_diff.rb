@@ -178,13 +178,11 @@ module HypDiff; class << self
     attr_reader :insertions, :deletions, :new_text
 
     def apply_insertions_and_deletions
-      unless deletions.empty? || insertions.empty?
-        while !deletions.empty? && !insertions.empty?
-          break unless deletions.first == insertions.first
+      while !deletions.empty? && !insertions.empty?
+        break unless deletions.first == insertions.first
 
-          deletions.shift
-          new_text << insertions.shift
-        end
+        deletions.shift
+        new_text << insertions.shift
       end
 
       if deletions.length > 0
