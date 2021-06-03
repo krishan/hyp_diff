@@ -192,4 +192,10 @@ describe HypDiff do
     expect_diff("hello world", "hello world.", "hello world<ins>.</ins>")
   end
 
+  it "converts newlines to spaces" do
+    content =
+      "<h3>Office philosophy</h3>\n<h4> No set working places</h4>\n<p> bla bla </p>"
+    expect_diff(content, content,
+      "<h3>Office philosophy</h3> <h4>No set working places</h4> <p>bla bla </p>")
+  end
 end
