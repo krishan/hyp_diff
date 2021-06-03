@@ -7,7 +7,7 @@ class TextFromNode
   end
 
   def ==(other)
-    text == other.text
+    eql?(other)
   end
 
   def eql?(other)

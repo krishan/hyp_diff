@@ -42,14 +42,14 @@ module HypDiff; class << self
 
   # @api private
   class NodeMap
-    def self.for(change_node_tuples, &block)
+    def self.for(change_node_tuples)
       new.build(change_node_tuples).map
     end
 
     attr_reader :map
 
     def initialize
-      @map = {}
+      @map = Hash.new {|h, k| h[k] = [] }
       @stashed = []
     end
 
@@ -79,8 +79,7 @@ module HypDiff; class << self
     end
 
     def append_to_node(node, change)
-      list = (@map[node] ||= [])
-      list << change
+      @map[node] << change
     end
   end
 
