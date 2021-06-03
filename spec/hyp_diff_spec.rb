@@ -125,17 +125,22 @@ describe HypDiff do
       expect_diff("hello  world", "hello world", "hello world")
     end
 
-    it "treats consecutive whitespace as a single whitespace across tags", :aggregate_failures do
+    it "treats consecutive whitespace as a single whitespace across tags" do
       expect_diff(
         "<span>hello </span> <span> world</span>",
         "hello world",
         "hello world"
       )
-      expect_diff(
-        "<span>hello </span>world",
-        "hello<span> world</span>",
-        "hello<span> world</span>"
-      )
+    end
+
+    it "treats consecutive whitespace as a single whitespace across tags (best effort for special cases)" do
+      expect(
+        HypDiff.compare(
+          "<span>hello </span>world",
+          "hello<span> world</span>",
+        )
+      ).to eq("hello<span> world</span>")
+        .or eq("hello<del> </del><span><ins> </ins>world</span>")
     end
 
     it "considers trailing and leading whitespace for insertions and deletions", :aggregate_failures do
